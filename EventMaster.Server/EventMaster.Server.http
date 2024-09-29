@@ -1,0 +1,18 @@
+@EventMaster.Server_HostAddress = http://localhost:5242
+
+
+
+GET {{EventMaster.Server_HostAddress}}/api/events
+
+Accept: application/json
+
+###
+POST {{EventMaster.Server_HostAddress}}/api/events/Third/register_to_event
+Content-Type: application/json
+Accept: application/json
+
+{
+    "Email": "john.doe@example.com"
+}
+###
+GET {{EventMaster.Server_HostAddress}}/api/events/user/john.doe@example.com/events
