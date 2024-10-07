@@ -4,7 +4,8 @@ namespace EventMaster.Server.Services.Entities
 {
     public class User
     {
-        public string FirstName { get; set; }
+        public int Id { get; set; } // = default;   
+        public string FirstName { get; set; } 
         public string LastName { get; set; }
         public DateTime BirthDate { get; set; }
         public DateTime DateOf { get; set; }
@@ -14,5 +15,7 @@ namespace EventMaster.Server.Services.Entities
         public string Role { get; set; }
         public string Password { get; set; }
         public List<Event> RegisteredEvents { get; set; } = [];
+        public string? RefreshToken { get; set; }
+        public DateTime? RefreshTokenExpiryDate { get; set; }
     }
 }

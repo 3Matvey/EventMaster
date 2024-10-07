@@ -1,90 +1,58 @@
 ﻿using EventMaster.Server.Services.Entities;
+using EventMaster.Server.UnitOfWork;
 
-namespace EventMaster.Server.Services
+public class UserService
 {
-    public class UserService
+    private readonly IUnitOfWork _unitOfWork;
+
+    public UserService(IUnitOfWork unitOfWork)
     {
-        private readonly List<User> _users =
-        [
-            new User
-            {
-                FirstName = "John",
-                LastName = "Doe",
-                BirthDate = new DateTime(1990, 5, 15),
-                DateOf = DateTime.Now,
-                Email = "john.doe@example.com",
-                Password = "123",
-                Role = "User",
-                RegisteredEvents = []
-            },
-            new User
-            {
-                FirstName = "Jane",
-                LastName = "Smith",
-                BirthDate = new DateTime(1985, 8, 23),
-                DateOf = DateTime.Now,
-                Email = "jane.smith@example.com",
-                Password = "456",
-                Role = "Admin",
-                RegisteredEvents = []
-            },
-            new User
-            {
-                FirstName = "Alex",
-                LastName = "Johnson",
-                BirthDate = new DateTime(1993, 10, 2),
-                DateOf = DateTime.Now,
-                Email = "alex.johnson@example.com",
-                Password = "789",
-                Role = "User",
-                RegisteredEvents = []
-            },
-            new User
-            {
-                FirstName = "Sanya",
-                LastName = "Volchok",
-                BirthDate = new DateTime(2005, 5, 18),
-                DateOf = DateTime.Now,
-                Email = "f104flyingcoffin@mail.com",
-                Password = "password88",
-                Role = "Admin",
-                RegisteredEvents = []
-            },
-            new User
-            {
-                FirstName = "Maria",
-                LastName = "Kovalsky",
-                BirthDate = new DateTime(1992, 11, 12),
-                DateOf = DateTime.Now,
-                Email = "maria.kovalsky@example.com",
-                Password = "321",
-                Role = "User",
-                RegisteredEvents = []
-            }
-        ];
+        _unitOfWork = unitOfWork;
+    }
 
-        // Получение всех пользователей
-        public List<User> GetAllUsers()
-        {
-            return _users;
-        }
+    public async Task AddUserAsync(User newUser)
+    {
+        await _unitOfWork.UserRepository.AddUserAsync(newUser);
+        await _unitOfWork.SaveAsync();
+    }
 
-        // Поиск пользователя по Email
-        public User? GetUserByEmail(string email)
-        {
-            return _users?.FirstOrDefault(u => u.Email == email);
-        }
+    public async Task<List<User>> GetAllUsersAsync()
+    {
+        return await _unitOfWork.UserRepository.GetAllUsersAsync();
+    }
 
-        // Добавление нового пользователя
-        public void AddUser(User user)
-        {
-            _users.Add(user);
-        }
+    public async Task<User?> GetUserByEmailAsync(string email)
+    {
+        return await _unitOfWork.UserRepository.GetUserByEmailAsync(email);
+    }
 
-        // Проверка, существует ли пользователь с таким Email
-        public bool UserExists(string email)
+    public async Task<User?> GetUserByIdAsync(int id)
+    {
+        return await _unitOfWork.UserRepository.GetUserByIdAsync(id);
+    }
+
+    public async Task<bool> UpdateUserAsync(User user)
+    {
+        var success = await _unitOfWork.UserRepository.UpdateUserAsync(user);
+        if (success)
         {
-            return _users.Any(u => u.Email == email);
+            await _unitOfWork.SaveAsync();
         }
+        return success;
+    }
+
+    public async Task<bool> DeleteUserAsync(int id)
+    {
+        var success = await _unitOfWork.UserRepository.DeleteUserAsync(id);
+        if (success)
+        {
+            await _unitOfWork.SaveAsync();
+        }
+        return success;
+    }
+
+    public async Task<bool> UserExistsAsync(string email)
+    {
+        return await _unitOfWork.UserRepository.UserExistsAsync(email);
     }
 }

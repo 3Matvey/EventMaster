@@ -9,5 +9,6 @@ interface EventDetails {
     type: string;
     maxMemberCount: number;
     users: User[];
+    imagePath?: string;
 }
 export type { EventDetails };

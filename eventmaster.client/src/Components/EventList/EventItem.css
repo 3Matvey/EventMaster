@@ -1,0 +1,125 @@
+.event-item {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    background-color: #2a2a40;
+    color: #ffffff;
+    border-radius: 8px;
+    padding: 10px;
+    margin: 5px;
+    width: calc(25% - 10px); /* Теперь каждая карточка занимает четверть контейнера */
+    box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+    transition: transform 0.2s, box-shadow 0.2s;
+    text-align: left;
+}
+
+    .event-item:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 5px 10px rgba(0, 0, 0, 0.3);
+    }
+
+.event-item__image {
+    width: 50px;
+    height: 50px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 5px;
+}
+
+    .event-item__image img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+.event-item__details {
+    margin-bottom: 8px;
+    width: 100%;
+}
+
+    .event-item__details h3 {
+        margin: 0 0 5px;
+        font-size: 1rem;
+        color: #f0f0f0;
+    }
+
+    .event-item__details p {
+        margin: 3px 0;
+        font-size: 0.8rem;
+        color: #cccccc;
+    }
+
+.event-item__actions {
+    display: flex;
+    gap: 5px;
+    flex-wrap: wrap;
+    margin-top: 8px;
+}
+
+    .event-item__actions button {
+        padding: 6px 8px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        transition: background-color 0.2s, transform 0.2s;
+        color: #ffffff;
+        font-weight: bold;
+        font-size: 0.75rem;
+    }
+
+        .event-item__actions button:hover {
+            transform: translateY(-2px);
+        }
+
+        .event-item__actions button:first-of-type {
+            background-color: #4facfe; /* Register button */
+        }
+
+        .event-item__actions button:nth-of-type(2) {
+            background-color: #00c853; /* View Details button */
+        }
+
+        .event-item__actions button:nth-of-type(3) {
+            background-color: #ff9800; /* Edit button (admin only) */
+        }
+
+        .event-item__actions button:last-of-type {
+            background-color: #e53935; /* Delete button (admin only) */
+        }
+
+@media (max-width: 768px) {
+    .event-item {
+        width: calc(50% - 10px); /* На меньших экранах отображаем 2 карточки в строке */
+    }
+}
+
+@media (max-width: 480px) {
+    .event-item {
+        width: calc(100% - 10px); /* На самых маленьких экранах отображаем 1 карточку в строке */
+    }
+}
+
+.message {
+    padding: 10px;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.success {
+    background-color: #d4edda;
+    color: #155724;
+    border: 1px solid #c3e6cb;
+}
+
+.error {
+    background-color: #f8d7da;
+    color: #721c24;
+    border: 1px solid #f5c6cb;
+}
+
+.info {
+    background-color: #d1ecf1;
+    color: #0c5460;
+    border: 1px solid #bee5eb;
+}

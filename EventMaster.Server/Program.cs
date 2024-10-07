@@ -1,29 +1,29 @@
-using Microsoft.AspNetCore.Authentication.JwtBearer;
+п»їusing Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using EventMaster.Server.Data;
 using Microsoft.EntityFrameworkCore;
-using EventMaster.Server.Controllers;
-using EventMaster.Server.Services;
+using static EventMaster.Server.Controllers.AuthController;
+using EventMaster.Server.Repositories.Implementation;
+using EventMaster.Server.Repositories.Interfaces;
+using EventMaster.Server.UnitOfWork;
 
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
 
-// Добавление контекста базы данных с MS SQL Server
-//builder.Services.AddDbContext<AppDbContext>(options =>
-//    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
+builder.Services.AddDbContext<AppDbContext>(options =>
+    options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 
-
-//builder.Services.AddControllers();
 builder.Services.AddControllers()
     .AddNewtonsoftJson(options =>
         options.SerializerSettings.ReferenceLoopHandling = Newtonsoft.Json.ReferenceLoopHandling.Ignore);
 
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
+// Swagger/OpenAPI
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 
+// CORS
 builder.Services.AddCors(options =>
 {
     options.AddPolicy("AllowAllOrigins", builder =>
@@ -32,11 +32,16 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddSingleton<EventService>();
-builder.Services.AddSingleton<UserService>();  // Регистрируем UserService как Singleton
+// Р РµРіРёСЃС‚СЂР°С†РёСЏ Unit of Work Рё СЂРµРїРѕР·РёС‚РѕСЂРёРµРІ
+builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
+builder.Services.AddScoped<IUserRepository, UserRepository>();
+builder.Services.AddScoped<IEventRepository, EventRepository>();
 
+// Р РµРіРёСЃС‚СЂР°С†РёСЏ СЃРµСЂРІРёСЃРѕРІ
+builder.Services.AddScoped<EventService>();
+builder.Services.AddScoped<UserService>();
 
-// Чтение настроек JWT из конфигурации и регистрация их в контейнере зависимостей
+// JWT РЅР°СЃС‚СЂРѕР№РєРё
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
 
@@ -49,8 +54,8 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateAudience = true,
             ValidateLifetime = true,
             ValidateIssuerSigningKey = true,
-            ValidIssuer = jwtSettings["ValidIssuer"],  // Чтение значения Issuer из конфигурации
-            ValidAudience = jwtSettings["ValidAudience"],  // Чтение значения Audience из конфигурации
+            ValidIssuer = jwtSettings["ValidIssuer"],
+            ValidAudience = jwtSettings["ValidAudience"],
             IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["IssuerSigningKey"]))
         };
     });
@@ -61,12 +66,14 @@ builder.Services.AddAuthorization(options =>
     options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
 });
 
-
-
 var app = builder.Build();
 
+// Р”РѕР±Р°РІР»СЏРµРј ExceptionMiddleware
+app.UseMiddleware<EventMaster.Server.Middlewares.ExceptionMiddleware>();
+
+
 app.UseCors("AllowAllOrigins");
-app.UseAuthentication();  // JWT аутентификация должна быть перед авторизацией
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.UseDefaultFiles();
@@ -80,7 +87,6 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseHttpsRedirection();
-
 
 app.MapControllers();
 

@@ -1,126 +1,121 @@
-import { useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import axios from 'axios';
+import { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
+import axios from 'axios';
+import { Server_HostAddress } from '../services/constants/Server_HostAddress';
 import { RootState } from '../store';
 import { setEvents } from '../store/slices/eventsSlice';
-import { setUser, registerEvent } from '../store/slices/userSlice';
-import { Server_HostAddress } from '../services/constants/Server_HostAddress';
-import { EventDetails } from '../services/interfaces/Event';
+import { EventItem } from '../Components/EventList/EventItem';
+import { HeaderComponent } from '../Components/EventList/HeaderComponent';
+import './EventList.css'; // Подключаем новый CSS
 
 export function EventList() {
     const events = useSelector((state: RootState) => state.events.events);
-    const user = useSelector((state: RootState) => state.user);
     const dispatch = useDispatch();
-    const navigate = useNavigate();
+
+    const [searchName, setSearchName] = useState('');
+    const [searchDate, setSearchDate] = useState('');
+    const [type, setType] = useState('');
+    const [place, setPlace] = useState('');
+    const [pageNumber, setPageNumber] = useState(1);
+    const pageSize = 6; // Устанавливаем фиксированное количество событий на страницу
 
     useEffect(() => {
         const fetchEvents = async () => {
             try {
-                const token = localStorage.getItem('token');  // Получаем токен для запроса
+                const token = localStorage.getItem('token');
+                console.log("Token:", token);
 
-                const response = await axios.get(`${Server_HostAddress}/api/events`, {
+                const response = await axios.get(`${Server_HostAddress}/api/events/filter`, {
                     headers: {
                         'Authorization': `Bearer ${token}`
+                    },
+                    params: {
+                        name: searchName,
+                        date: searchDate,
+                        type,
+                        place,
+                        pageNumber,
+                        pageSize
                     }
                 });
 
-                console.log('Fetched events:', response.data); // Лог для проверки данных от API
+                console.log("Response:", response);
 
                 if (response.status === 200 && Array.isArray(response.data)) {
                     dispatch(setEvents(response.data));
+                    console.log("Events set in state:", response.data);
                 } else {
-                    console.error('Unexpected data format:', response.data);
+                    console.warn("Unexpected response structure:", response);
                 }
             } catch (error) {
                 console.error('Failed to fetch events', error);
             }
         };
 
-        if (events.length === 0) {
-            fetchEvents();
-        } else {
-            console.log('Events already in state:', events); // Лог текущих событий в state
-        }
-    }, [events.length, dispatch]);
-
-    const handleRegister = async (eventName: string) => {
-        if (!user.email) {
-            alert('User email is not found. Please log in again.');
-            return;
-        }
-
-        try {
-            console.log(`Registering for event: ${eventName}`);
-            console.log(`User email: ${user.email}`);
-
-            const response = await axios.post(`${Server_HostAddress}/api/events/${eventName}/register_to_event`,
-                { Email: user.email }, {
-                headers: {
-                    'Content-Type': 'application/json',
-                }
-            });
-
-            if (response.status === 200) {
-                alert('You have successfully registered for the event.');
-
-                // Обновляем события после успешной регистрации
-                const updatedEvents = events.map(event =>
-                    event.name === eventName
-                        ? { ...event, users: [...event.users, user] }
-                        : event
-                );
-
-                console.log('Updated events:', updatedEvents);
-
-                dispatch(setEvents(updatedEvents));
-
-                // Обновляем зарегистрированные события пользователя
-                const registeredEvent = updatedEvents.find(event => event.name === eventName);
-                if (registeredEvent) {
-                    dispatch(registerEvent(registeredEvent));
-                }
-            }
-        } catch (error) {
-            console.error('Failed to register:', error);
-            if (axios.isAxiosError(error) && error.response) {
-                alert(`Registration failed: ${error.response.data.Message}`);
-            } else {
-                alert('Registration failed due to an unexpected error.');
-            }
-        }
-    };
-
-    const handleViewDetails = (eventName: string) => {
-        navigate(`/events/${eventName}`);
-    };
-
-    const handleViewMyEvents = () => {
-        navigate('/my-events');
-    };
+        fetchEvents();
+    }, [searchName, searchDate, type, place, pageNumber, dispatch]);
 
     return (
-        <div>
-            <header>
-                <p>Welcome, {user.firstName} {user.lastName}</p>
-                {user.role === 'Admin' && <p>You have admin privileges</p>}
-                <button onClick={handleViewMyEvents}>My Registered Events</button>
-            </header>
+        <div className="event-list-container">
+            <HeaderComponent />
 
-            <h2>Event List</h2>
-            <ul>
+            <h2 className="event-list-title">Event List</h2>
+
+            <div className="filters">
+                <input
+                    type="text"
+                    placeholder="Search by name"
+                    value={searchName}
+                    onChange={(e) => setSearchName(e.target.value)}
+                />
+                <input
+                    type="date"
+                    value={searchDate}
+                    onChange={(e) => setSearchDate(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Type"
+                    value={type}
+                    onChange={(e) => setType(e.target.value)}
+                />
+                <input
+                    type="text"
+                    placeholder="Place"
+                    value={place}
+                    onChange={(e) => setPlace(e.target.value)}
+                />
+            </div>
+
+            <ul className="event-list">
                 {events.length > 0 ? (
                     events.map(event => (
-                        <li key={event.name}>
-                            {event.name} - {new Date(event.date).toLocaleDateString()}
-                            <button onClick={() => handleRegister(event.name)}>Register</button>
-                            <button onClick={() => handleViewDetails(event.name)}>View Details</button>
-                        </li>
+                        <EventItem key={event.id} event={event} />
                     ))
                 ) : (
                     <p>No events available.</p>
                 )}
             </ul>
+
+            <div className="pagination">
+                <button
+                    disabled={pageNumber === 1}
+                    onClick={() => {
+                        setPageNumber(prev => Math.max(prev - 1, 1));
+                    }}
+                >
+                    Previous
+                </button>
+                <span>Page {pageNumber}</span>
+                <button
+                    disabled={events.length < pageSize}
+                    onClick={() => {
+                        setPageNumber(prev => prev + 1);
+                    }}
+                >
+                    Next
+                </button>
+            </div>
         </div>
     );
 }

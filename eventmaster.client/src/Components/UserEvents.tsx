@@ -3,16 +3,19 @@ import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { Server_HostAddress } from '../services/constants/Server_HostAddress';
 import { EventDetails } from '../services/interfaces/EventDetails';
+import './UserEvents.css'; // Импортируем стили
 
 export function UserEvents() {
     const [registeredEvents, setRegisteredEvents] = useState<EventDetails[]>([]);
     const navigate = useNavigate();
     const userEmail = localStorage.getItem('email');
+    const [message, setMessage] = useState<{ text: string, type: 'success' | 'error' | '' }>({ text: '', type: '' });
+
 
     useEffect(() => {
         const fetchUserEvents = async () => {
             if (!userEmail) {
-                alert('User email is not found. Please log in again.');
+                setMessage({ text: 'User email is not found. Please log in again.', type: 'error' });
                 return;
             }
 
@@ -21,7 +24,7 @@ export function UserEvents() {
 
                 console.log(`Fetching registered events for user: ${userEmail}`); // Логирование для проверки
 
-                const response = await axios.get(`${Server_HostAddress}/api/events/user/${userEmail}/events`, {
+                const response = await axios.get(`${Server_HostAddress}/api/user/${userEmail}/events`, {
                     headers: {
                         'Authorization': `Bearer ${token}`,
                         'Content-Type': 'application/json' // Убедитесь, что указываете тип содержимого
@@ -32,15 +35,16 @@ export function UserEvents() {
 
                 if (response.status === 200) {
                     setRegisteredEvents(response.data);
+                    setMessage({ text: '', type: '' }); // Очищаем сообщение
                 } else {
                     console.error('Unexpected response status:', response.status);
                 }
             } catch (error) {
                 console.error('Failed to fetch registered events', error);
                 if (axios.isAxiosError(error) && error.response) {
-                    alert(`Failed to fetch registered events: ${error.response.data.Message}`);
+                    setMessage({ text: `Failed to fetch registered events: ${error.response.data.Message}`, type: 'error' });
                 } else {
-                    alert('An unexpected error occurred while fetching registered events.');
+                    setMessage({ text: 'An unexpected error occurred while fetching registered events.', type: 'error' });
                 }
             }
         };
@@ -48,23 +52,83 @@ export function UserEvents() {
         fetchUserEvents();
     }, [userEmail]);
 
-    const handleViewDetails = (eventName: string) => {
-        navigate(`/events/${eventName}`);
+    const handleViewDetails = (eventId: number) => {
+        navigate(`/events/${eventId}`);
+    };
+
+    const handleUnregister = async (eventId: number) => {
+        if (!userEmail) {
+            console.log('User email is not found');
+            return;
+        }
+
+        setMessage({ text: `Are you sure you want to unregister from the event "${eventId}"?`, type: '' });
+
+        if (!window.confirm(`Are you sure you want to unregister from the event "${eventId}"?`)) {
+            return;
+        }
+
+        try {
+            const token = localStorage.getItem('token');
+
+            console.log(`Unregistering user: ${userEmail} from event: ${eventId}`);
+
+            const response = await axios.delete(`${Server_HostAddress}/api/user/${eventId}/unregister`, {
+                headers: {
+                    'Authorization': `Bearer ${token}`,
+                    'Content-Type': 'application/json',
+                },
+                data: {
+                    email: userEmail,
+                },
+            });
+
+            if (response.status === 200) {
+                setMessage({ text: 'Successfully unregistered from the event.', type: 'success' });
+
+                // Обновляем список зарегистрированных событий после отмены регистрации
+                setRegisteredEvents((prevEvents) =>
+                    prevEvents.filter((event) => event.id !== eventId)
+                );
+            } else {
+                console.error('Unexpected response status:', response.status);
+            }
+        } catch (error) {
+            console.error('Failed to unregister from event', error);
+            if (axios.isAxiosError(error) && error.response) {
+                setMessage({ text: `Failed to unregister from event: ${error.response.data.Message}`, type: 'error' });
+            } else {
+                setMessage({ text: 'An unexpected error occurred while unregistering from the event.', type: 'error' });
+            }
+        }
     };
 
     return (
-        <div>
+        <div className="user-events-container">
             <h2>Registered Events</h2>
-            <ul>
+
+            {/* Добавляем сообщение, если оно есть */}
+            {message.text && (
+                <div className={`message ${message.type}`}>
+                    {message.text}
+                </div>
+            )}
+
+            <ul className="user-events-list">
                 {registeredEvents.length > 0 ? (
                     registeredEvents.map(event => (
-                        <li key={event.name}>
-                            {event.name} - {new Date(event.date).toLocaleDateString()}
-                            <button onClick={() => handleViewDetails(event.name)}>View Details</button>
+                        <li key={event.id}>
+                            <div className="event-details">
+                                <span>{event.name}</span> - {new Date(event.date).toLocaleDateString()}
+                            </div>
+                            <div className="event-actions">
+                                <button className="view-details-btn" onClick={() => handleViewDetails(event.id)}>View Details</button>
+                                <button className="unregister-btn" onClick={() => handleUnregister(event.id)}>Unregister</button>
+                            </div>
                         </li>
                     ))
                 ) : (
-                    <p>You are not registered for any events yet.</p>
+                    <p className="no-events-message">You are not registered for any events yet.</p>
                 )}
             </ul>
         </div>

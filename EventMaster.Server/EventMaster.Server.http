@@ -16,3 +16,10 @@ Accept: application/json
 }
 ###
 GET {{EventMaster.Server_HostAddress}}/api/events/user/john.doe@example.com/events
+###
+POST {{EventMaster.Server_HostAddress}}/api/create_event
+Content-Type: application/json
+Accept: application/json
+{
+
+}

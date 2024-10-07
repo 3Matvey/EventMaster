@@ -14,10 +14,21 @@ const eventsSlice = createSlice({
     initialState,
     reducers: {
         setEvents(state, action: PayloadAction<EventDetails[]>) {
-            state.events = action.payload; 
+            state.events = action.payload.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+        },
+        removeEvent(state, action: PayloadAction<EventDetails>) {
+            state.events = state.events.filter(event => event.id !== action.payload.id);
+        },
+        updateEvent(state, action: PayloadAction<EventDetails>) {
+            const index = state.events.findIndex(event => event.id === action.payload.id);
+            if (index !== -1) {
+                state.events[index] = action.payload;
+                // Re-sort after updating
+                state.events.sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+            }
         },
     },
 });
 
-export const { setEvents } = eventsSlice.actions;
+export const { setEvents, removeEvent, updateEvent } = eventsSlice.actions;
 export default eventsSlice.reducer;

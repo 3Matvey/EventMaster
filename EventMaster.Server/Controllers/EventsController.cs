@@ -1,7 +1,5 @@
 ﻿using Microsoft.AspNetCore.Mvc;
-using EventMaster.Server.Services;
 using EventMaster.Server.Services.Entities;
-using System.ComponentModel.DataAnnotations;
 
 namespace EventMaster.Server.Controllers
 {
@@ -20,184 +18,195 @@ namespace EventMaster.Server.Controllers
 
         // Получение всех событий
         [HttpGet]
-        public ActionResult<IEnumerable<Event>> GetEvents()
+        public async Task<ActionResult<IEnumerable<Event>>> GetEvents()
         {
-            var events = _eventService.GetAllEvents();
-            return Ok(events);
+            try
+            {
+                var events = await _eventService.GetAllEventsAsync();
+
+                if (events == null || events.Count == 0)
+                {
+                    return NotFound(new { Message = "No events found" });
+                }
+
+                return Ok(events.OrderBy(e => e.Date));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching events: {ex.Message}");
+                return StatusCode(500, new { Message = "An error occurred while fetching the events. Please try again later." });
+            }
         }
 
-        // Получение события по имени
-        [HttpGet("{name}")]
-        public ActionResult<Event> GetEvent(string name)
+        // Получение события по ID
+        [HttpGet("{id:int}")]
+        public async Task<ActionResult<Event>> GetEvent(int id)
         {
-            var eventItem = _eventService.GetEventByName(name);
+            var eventItem = await _eventService.GetEventByIdAsync(id);
             if (eventItem == null)
             {
-                return NotFound();
+                return NotFound(new { Message = "Event not found" });
             }
             return Ok(eventItem);
         }
 
         // Создание нового события
-        [HttpPost]
-        public ActionResult<Event> CreateEvent(Event newEvent)
+        [HttpPost("create_event")]
+        public async Task<ActionResult<Event>> CreateEvent([FromBody] Event newEvent)
         {
-            _eventService.AddEvent(newEvent);
-            return CreatedAtAction(nameof(GetEvent), new { name = newEvent.Name }, newEvent);
+            if (newEvent == null ||
+                string.IsNullOrEmpty(newEvent.Name) ||
+                string.IsNullOrEmpty(newEvent.Description) ||
+                string.IsNullOrEmpty(newEvent.Place) ||
+                newEvent.Date == default ||
+                newEvent.MaxMemberCount <= 0)
+            {
+                return BadRequest(new { Message = "Invalid event data. Please ensure all fields are filled correctly." });
+            }
+
+            try
+            {
+                await _eventService.AddEventAsync(newEvent);
+                return CreatedAtAction(nameof(GetEvent), new { id = newEvent.Id }, newEvent);
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error creating event: {ex.Message}");
+                return StatusCode(500, new { Message = "An error occurred while creating the event." });
+            }
         }
 
         // Обновление события
-        [HttpPut("{name}")]
-        public IActionResult UpdateEvent(string name, Event updatedEvent)
+        [HttpPut("{id:int}")]
+        public async Task<IActionResult> UpdateEvent(int id, [FromBody] Event updatedEvent)
         {
-            bool success = _eventService.UpdateEvent(name, updatedEvent);
+            updatedEvent.Id = id;
+            var success = await _eventService.UpdateEventAsync(updatedEvent);
             if (!success)
             {
-                return NotFound();
+                return NotFound(new { Message = "Event not found" });
             }
 
-            return NoContent();
+            return Ok(updatedEvent);
         }
 
         // Удаление события
-        [HttpDelete("{name}")]
-        public IActionResult DeleteEvent(string name)
+        [HttpDelete("{id:int}")]
+        public async Task<IActionResult> DeleteEvent(int id)
         {
-            bool success = _eventService.DeleteEvent(name);
+            var success = await _eventService.DeleteEventAsync(id);
             if (!success)
             {
-                return NotFound();
+                return NotFound(new { Message = "Event not found" });
             }
 
             return NoContent();
         }
 
-        public class RegisterToEventDto
-        {
-            public string Email { get; set; }
-        }
+        // Регистрация пользователя на событие
+        public record RegisterToEventDto(string Email);
 
-        [HttpPost("{eventName}/register_to_event")]
-        public IActionResult RegisterUserToEvent(string eventName, [FromBody] RegisterToEventDto dto)
+        [HttpPost("{id:int}/register_to_event")]
+        public async Task<IActionResult> RegisterUserToEvent(int id, [FromBody] RegisterToEventDto dto)
         {
             if (dto == null || string.IsNullOrEmpty(dto.Email))
             {
                 return BadRequest(new { Message = "Email is required" });
             }
 
-            var userEmail = dto.Email;
-            var eventItem = _eventService.GetEventByName(eventName);
-            var user = _userService.GetUserByEmail(userEmail);
+            var eventItem = await _eventService.GetEventByIdAsync(id);
+            var user = await _userService.GetUserByEmailAsync(dto.Email);
 
             if (eventItem == null || user == null)
             {
                 return NotFound(new { Message = "Event or user not found" });
             }
 
-            if (eventItem.Users.Any(u => u.Email == userEmail))
+            var success = await _eventService.RegisterUserToEventAsync(eventItem, user);
+            if (!success)
             {
-                return BadRequest(new { Message = "User is already registered for this event" });
+                return BadRequest(new { Message = "User is already registered for this event or event is full" });
             }
-
-            if (eventItem.Users.Count >= eventItem.MaxMemberCount)
-            {
-                return BadRequest(new { Message = "The event has reached its maximum member capacity" });
-            }
-
-            eventItem.Users.Add(user);
-            user.RegisteredEvents.Add(eventItem);
 
             return Ok(new { Message = "User successfully registered for the event" });
         }
 
-
-        [HttpGet("user/{email}/events")]
-        public IActionResult GetRegisteredEvents(string email)
-        {
-            try
-            {
-                // Проверяем, есть ли пользователь с данным email
-                var user = _userService.GetUserByEmail(email);
-
-                if (user == null)
-                {
-                    return NotFound(new { Message = "User not found" });
-                }
-
-                if (user.RegisteredEvents == null)
-                {
-                    // Если пользователь существует, но зарегистрированных событий нет
-                    return Ok(new List<Event>()); // Возвращаем пустой список вместо ошибки
-                }
-
-                return Ok(user.RegisteredEvents);
-            }
-            catch (Exception ex)
-            {
-                // Логируем исключение для анализа
-                Console.WriteLine($"Error fetching registered events for user {email}: {ex.Message}");
-                return StatusCode(500, new { Message = "An internal server error occurred. Please try again later." });
-            }
-        }
-
-
         // Получение пользователей по событию
-        [HttpGet("{name}/users")]
-        public ActionResult<IEnumerable<User>> GetEventUsers(string name)
+        [HttpGet("{id:int}/users")]
+        public async Task<ActionResult<IEnumerable<User>>> GetEventUsers(int id)
         {
-            var eventItem = _eventService.GetEventByName(name);
+            var eventItem = await _eventService.GetEventByIdAsync(id);
             if (eventItem == null)
             {
-                return NotFound();
+                return NotFound(new { Message = "Event not found" });
             }
 
             return Ok(eventItem.Users);
         }
 
-        [HttpGet("paged")]
-        public IActionResult GetPagedEvents(int pageNumber = 1, int pageSize = 10)
-        {
-            var pagedEvents = _eventService.GetAllEvents()
-                                           .Skip((pageNumber - 1) * pageSize)
-                                           .Take(pageSize)
-                                           .ToList();
-            return Ok(pagedEvents);
-        }
-
-        [HttpGet("search")]
-        public IActionResult SearchEvents(string? name, DateTime? date)
-        {
-            var events = _eventService.GetAllEvents();
-
-            if (!string.IsNullOrEmpty(name))
-            {
-                events = events.Where(e => e.Name.Contains(name, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
-            if (date.HasValue)
-            {
-                events = events.Where(e => e.Date.Date == date.Value.Date).ToList();
-            }
-
-            return Ok(events);
-        }
-
+        // Получение фильтрованных событий
         [HttpGet("filter")]
-        public IActionResult FilterEvents(string? category, string? place)
+        public async Task<ActionResult<IEnumerable<Event>>> GetFilteredEvents(
+            [FromQuery] string? name,
+            [FromQuery] DateTime? date,
+            [FromQuery] string? type,
+            [FromQuery] string? place,
+            [FromQuery] int pageNumber = 1,
+            [FromQuery] int pageSize = 10)
         {
-            var events = _eventService.GetAllEvents();
-
-            if (!string.IsNullOrEmpty(category))
-            {
-                events = events.Where(e => e.Type == category).ToList();
-            }
-
-            if (!string.IsNullOrEmpty(place))
-            {
-                events = events.Where(e => e.Place.Contains(place, StringComparison.OrdinalIgnoreCase)).ToList();
-            }
-
+            var events = await _eventService.GetFilteredEventsAsync(name, date, type, place, pageNumber, pageSize);
             return Ok(events);
         }
+
+        // Загрузка изображения для события
+        [HttpPost("{id:int}/upload-image")]
+        public async Task<IActionResult> UploadImageOrUrl(int id, [FromForm] IFormFile? imageFile, [FromForm] string? imageUrl)
+        {
+            var eventItem = await _eventService.GetEventByIdAsync(id);
+            if (eventItem == null)
+            {
+                return NotFound(new { Message = "Event not found." });
+            }
+
+            if (imageFile != null && imageFile.Length > 0)
+            {
+                return await UploadImageFile(eventItem, imageFile);
+            }
+            else if (!string.IsNullOrEmpty(imageUrl))
+            {
+                return await UploadImageUrl(eventItem, imageUrl);
+            }
+            else
+            {
+                return BadRequest(new { Message = "No file or URL was provided." });
+            }
+        }
+
+        private async Task<IActionResult> UploadImageFile(Event eventItem, IFormFile imageFile)
+        {
+            try
+            {
+                await _eventService.UploadImageAsync(eventItem, imageFile);
+                return Ok(new { Message = "Image uploaded successfully.", ImagePath = eventItem.ImagePath });
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, new { Message = "Failed to upload image.", Error = ex.Message });
+            }
+        }
+
+        private async Task<IActionResult> UploadImageUrl(Event eventItem, string imageUrl)
+        {
+            try
+            {
+                await _eventService.UploadImageUrlAsync(eventItem, imageUrl);
+                return Ok(new { Message = "Image URL successfully added to the event.", ImagePath = eventItem.ImagePath });
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(new { Message = "Failed to download image from URL.", Error = ex.Message });
+            }
+        }
+
     }
 }

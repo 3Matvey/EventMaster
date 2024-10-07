@@ -1,96 +1,107 @@
 ﻿using EventMaster.Server.Services.Entities;
+using EventMaster.Server.UnitOfWork;
 
-namespace EventMaster.Server.Services
+public class EventService
 {
-    public class EventService
+    private readonly IUnitOfWork _unitOfWork;
+
+    public EventService(IUnitOfWork unitOfWork)
     {
-        private readonly List<Event> _events =
-        [
-            new Event
-            {
-                Name = "First Event",
-                Description = "Description of the first event",
-                Date = DateTime.Now.AddDays(1),
-                Place = "Conference Hall A",
-                Type = "Conference",
-                MaxMemberCount = 100,
-                Users = new List<User>()
-            },
-            new Event
-            {
-                Name = "Second Event",
-                Description = "Description of the second event",
-                Date = DateTime.Now.AddDays(2),
-                Place = "Auditorium B",
-                Type = "Workshop",
-                MaxMemberCount = 50,
-                Users = new List<User>()
-            },
-            new Event
-            {
-                Name = "Third",
-                Description = "A special networking event for professionals",
-                Date = DateTime.Now.AddDays(5),
-                Place = "City Hall",
-                Type = "Networking",
-                MaxMemberCount = 200,
-                Users = new List<User>()
-            },
-            new Event
-            {
-                Name = "Fourth Event",
-                Description = "A hands-on coding workshop for beginners",
-                Date = DateTime.Now.AddDays(7),
-                Place = "Tech Park",
-                Type = "Coding Workshop",
-                MaxMemberCount = 30,
-                Users = new List<User>()
-            }
-        ];
+        _unitOfWork = unitOfWork;
+    }
 
-
-        // Получение всех событий
-        public List<Event> GetAllEvents()
+    public async Task<bool> AddEventAsync(Event newEvent)
+    {
+        var success = await _unitOfWork.EventRepository.AddEventAsync(newEvent);
+        if (success)
         {
-            return _events;
+            await _unitOfWork.SaveAsync();
         }
+        return success;
+    }
 
-        // Поиск события по имени
-        public Event GetEventByName(string name)
+    public async Task<Event?> GetEventByIdAsync(int id)
+    {
+        return await _unitOfWork.EventRepository.GetEventByIdAsync(id);
+    }
+
+    public async Task<List<Event>> GetAllEventsAsync()
+    {
+        return await _unitOfWork.EventRepository.GetAllEventsAsync();
+    }
+
+    public async Task<bool> UpdateEventAsync(Event updatedEvent)
+    {
+        var success = await _unitOfWork.EventRepository.UpdateEventAsync(updatedEvent);
+        if (success)
         {
-            return _events.FirstOrDefault(e => e.Name == name);
+            await _unitOfWork.SaveAsync();
         }
+        return success;
+    }
 
-        // Добавление нового события
-        public void AddEvent(Event newEvent)
+    public async Task<bool> DeleteEventAsync(int id)
+    {
+        var success = await _unitOfWork.EventRepository.DeleteEventAsync(id);
+        if (success)
         {
-            _events.Add(newEvent);
+            await _unitOfWork.SaveAsync();
         }
+        return success;
+    }
 
-        // Обновление события
-        public bool UpdateEvent(string name, Event updatedEvent)
+    public async Task<bool> RegisterUserToEventAsync(Event eventItem, User user)
+    {
+        var success = await _unitOfWork.EventRepository.RegisterUserToEventAsync(eventItem, user);
+        if (success)
         {
-            var index = _events.FindIndex(e => e.Name == name);
-            if (index == -1)
-            {
-                return false;
-            }
-
-            _events[index] = updatedEvent;
-            return true;
+            await _unitOfWork.SaveAsync();
         }
+        return success;
+    }
 
-        // Удаление события
-        public bool DeleteEvent(string name)
+    public async Task<bool> UnregisterUserFromEventAsync(Event eventItem, User user)
+    {
+        var success = await _unitOfWork.EventRepository.UnregisterUserFromEventAsync(eventItem, user);
+        if (success)
         {
-            var eventItem = _events.FirstOrDefault(e => e.Name == name);
-            if (eventItem == null)
-            {
-                return false;
-            }
-
-            _events.Remove(eventItem);
-            return true;
+            await _unitOfWork.SaveAsync();
         }
+        return success;
+    }
+
+    public async Task<bool> UpdateEventImagePathAsync(int eventId, string imagePath)
+    {
+        var success = await _unitOfWork.EventRepository.UpdateEventImagePathAsync(eventId, imagePath);
+        if (success)
+        {
+            await _unitOfWork.SaveAsync();
+        }
+        return success;
+    }
+
+    public async Task<List<Event>> GetFilteredEventsAsync(string? name, DateTime? date, string? type, string? place, int pageNumber, int pageSize)
+    {
+        return await _unitOfWork.EventRepository.GetFilteredEventsAsync(name, date, type, place, pageNumber, pageSize);
+    }
+
+    public async Task<bool> UploadImageAsync(Event eventItem, IFormFile imageFile)
+    {
+        var success = await _unitOfWork.EventRepository.UploadImageFileAsync(eventItem, imageFile);
+        if (success)
+        {
+            await _unitOfWork.SaveAsync();
+        }
+        return success;
+    }
+
+    public async Task<bool> UploadImageUrlAsync(Event eventItem, string imageUrl)
+    {
+        var success = await _unitOfWork.EventRepository.UploadImageFromUrlAsync(eventItem, imageUrl);
+        if (success)
+        {
+            await _unitOfWork.SaveAsync();
+        }
+        return success;
     }
 }
