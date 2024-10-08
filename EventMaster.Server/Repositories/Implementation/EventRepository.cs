@@ -90,7 +90,7 @@ namespace EventMaster.Server.Repositories.Implementation
 
             if (!string.IsNullOrEmpty(name))
             {
-                query = query.Where(e => e.Name.Contains(name, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(e => e.Name.Contains(name));
             }
 
             if (date.HasValue)
@@ -100,15 +100,16 @@ namespace EventMaster.Server.Repositories.Implementation
 
             if (!string.IsNullOrEmpty(type))
             {
-                query = query.Where(e => e.Type.Equals(type, StringComparison.OrdinalIgnoreCase));
+               query = query.Where(e => e.Type.Contains(type));
             }
 
             if (!string.IsNullOrEmpty(place))
             {
-                query = query.Where(e => e.Place.Contains(place, StringComparison.OrdinalIgnoreCase));
+                query = query.Where(e => e.Place.Contains(place));
             }
 
             query = query.OrderBy(e => e.Date);
+            
 
             return await query.Skip((pageNumber - 1) * pageSize).Take(pageSize).ToListAsync();
         }
