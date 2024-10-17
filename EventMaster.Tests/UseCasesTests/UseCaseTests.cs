@@ -136,14 +136,14 @@ namespace EventMaster.Tests.UseCasesTests
             var eventItem = new Event { Id = 1, Name = "Event to Delete" };
 
             _unitOfWorkMock.Setup(u => u.EventRepository.GetEventByIdAsync(It.IsAny<int>())).ReturnsAsync(eventItem);
-            _unitOfWorkMock.Setup(u => u.EventRepository.DeleteEventAsync(eventItem.Id)).Returns(Task.CompletedTask);
+            _unitOfWorkMock.Setup(u => u.EventRepository.DeleteEventAsync(eventItem)).Returns(Task.CompletedTask);
             _unitOfWorkMock.Setup(u => u.SaveAsync());
 
             // Act
             await useCase.Execute(1);
 
             // Assert
-            _unitOfWorkMock.Verify(u => u.EventRepository.DeleteEventAsync(eventItem.Id), Times.Once);
+            _unitOfWorkMock.Verify(u => u.EventRepository.DeleteEventAsync(eventItem), Times.Once);
             _unitOfWorkMock.Verify(u => u.SaveAsync(), Times.Once);
         }
     }
