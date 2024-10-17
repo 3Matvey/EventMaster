@@ -3,10 +3,11 @@ using Microsoft.IdentityModel.Tokens;
 using System.Text;
 using EventMaster.Server.Data;
 using Microsoft.EntityFrameworkCore;
-using static EventMaster.Server.Controllers.AuthController;
 using EventMaster.Server.Repositories.Implementation;
 using EventMaster.Server.Repositories.Interfaces;
 using EventMaster.Server.UnitOfWork;
+using EventMaster.Server.Dto;
+using EventMaster.Server.UseCases;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -37,13 +38,27 @@ builder.Services.AddScoped<IUnitOfWork, UnitOfWork>();
 builder.Services.AddScoped<IUserRepository, UserRepository>();
 builder.Services.AddScoped<IEventRepository, EventRepository>();
 
-// Регистрация сервисов
-builder.Services.AddScoped<EventService>();
-builder.Services.AddScoped<UserService>();
+// Регистрация use cases
+builder.Services.AddScoped<CreateEventUseCase>();
+builder.Services.AddScoped<DeleteEventUseCase>();
+builder.Services.AddScoped<GetAllEventsUseCase>();
+builder.Services.AddScoped<GetEventDetailsUseCase>();
+builder.Services.AddScoped<GetFilteredEventsUseCase>();
+builder.Services.AddScoped<GetRegisteredEventsUseCase>();
+builder.Services.AddScoped<GetUserByIdUseCase>();
+builder.Services.AddScoped<LoginUserUseCase>();
+builder.Services.AddScoped<RegisterUserToEventUseCase>();
+builder.Services.AddScoped<RegisterUserUseCase>();
+builder.Services.AddScoped<UnregisterUserFromEventUseCase>();
+builder.Services.AddScoped<UpdateEventUseCase>();
+builder.Services.AddScoped<UploadEventImageUseCase>();
+
 
 // JWT настройки
 builder.Services.Configure<JwtSettings>(builder.Configuration.GetSection("JwtSettings"));
 var jwtSettings = builder.Configuration.GetSection("JwtSettings");
+builder.Services.AddSingleton(typeof(JwtSettings));
+
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
     .AddJwtBearer(options =>
@@ -56,21 +71,20 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             ValidateIssuerSigningKey = true,
             ValidIssuer = jwtSettings["ValidIssuer"],
             ValidAudience = jwtSettings["ValidAudience"],
-            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["IssuerSigningKey"]))
+            IssuerSigningKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwtSettings["IssuerSigningKey"]!))
         };
     });
 
-builder.Services.AddAuthorization(options =>
-{
-    options.AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"));
-    options.AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
-});
+builder.Services.AddAuthorizationBuilder()
+    .AddPolicy("AdminPolicy", policy => policy.RequireRole("Admin"))
+    .AddPolicy("UserPolicy", policy => policy.RequireRole("User"));
+
+builder.Services.AddAutoMapper(typeof(Program));
 
 var app = builder.Build();
 
-// Добавляем ExceptionMiddleware
+// + ExceptionMiddleware
 app.UseMiddleware<EventMaster.Server.Middlewares.ExceptionMiddleware>();
-
 
 app.UseCors("AllowAllOrigins");
 app.UseAuthentication();
