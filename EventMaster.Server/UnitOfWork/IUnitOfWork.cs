@@ -1,5 +1,4 @@
 ﻿using EventMaster.Server.Repositories.Interfaces;
-using EventMaster.Server.Services.Entities;
 
 namespace EventMaster.Server.UnitOfWork
 {

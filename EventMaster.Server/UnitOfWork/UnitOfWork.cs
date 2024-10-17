@@ -1,7 +1,6 @@
 ﻿using EventMaster.Server.Data;
 using EventMaster.Server.Repositories.Implementation;
 using EventMaster.Server.Repositories.Interfaces;
-using EventMaster.Server.Services.Entities;
 
 namespace EventMaster.Server.UnitOfWork
 {
@@ -27,6 +26,7 @@ namespace EventMaster.Server.UnitOfWork
         public void Dispose()
         {
             _context.Dispose();
+            GC.SuppressFinalize(this);
         }
     }
 }

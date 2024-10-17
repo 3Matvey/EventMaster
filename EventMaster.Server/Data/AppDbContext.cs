@@ -1,4 +1,4 @@
-﻿using EventMaster.Server.Services.Entities;
+﻿using EventMaster.Server.Entities;
 using Microsoft.EntityFrameworkCore;
 
 namespace EventMaster.Server.Data
