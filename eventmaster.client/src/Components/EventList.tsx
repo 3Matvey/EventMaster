@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+п»їimport { useEffect, useState } from 'react';
 import { useDispatch, useSelector } from 'react-redux';
 import axios from 'axios';
 import { Server_HostAddress } from '../services/constants/Server_HostAddress';
@@ -6,7 +6,7 @@ import { RootState } from '../store';
 import { setEvents } from '../store/slices/eventsSlice';
 import { EventItem } from '../Components/EventList/EventItem';
 import { HeaderComponent } from '../Components/EventList/HeaderComponent';
-import './EventList.css'; // Подключаем новый CSS
+import './EventList.css'; 
 
 export function EventList() {
     const events = useSelector((state: RootState) => state.events.events);
@@ -17,7 +17,7 @@ export function EventList() {
     const [type, setType] = useState('');
     const [place, setPlace] = useState('');
     const [pageNumber, setPageNumber] = useState(1);
-    const pageSize = 6; // Устанавливаем фиксированное количество событий на страницу
+    const pageSize = 3; 
 
     useEffect(() => {
         const fetchEvents = async () => {
