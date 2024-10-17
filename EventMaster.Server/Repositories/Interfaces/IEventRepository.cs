@@ -7,9 +7,9 @@ namespace EventMaster.Server.Repositories.Interfaces
         Task AddEventAsync(Event newEvent);
         Task<Event?> GetEventByIdAsync(int id);
         Task<List<Event>> GetAllEventsAsync();
-        Task DeleteEventAsync(int id);
+        Task DeleteEventAsync(Event eventItem);
         Task UpdateEventAsync(Event eventItem);
-        Task UpdateEventImagePathAsync(int eventId, string imagePath);
+        Task UpdateEventImagePathAsync(Event eventItem, string imagePath);
         Task UploadImageFileAsync(Event eventItem, IFormFile imageFile);
         Task UploadImageFromUrlAsync(Event eventItem, string imageUrl);
     }

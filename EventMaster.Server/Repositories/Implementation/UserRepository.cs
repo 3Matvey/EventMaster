@@ -39,13 +39,9 @@ namespace EventMaster.Server.Repositories.Implementation
             _context.Users.Update(user);
         }
 
-        public async Task DeleteUserAsync(int id)
+        public async Task DeleteUserAsync(User user)
         {
-            var user = await GetUserByIdAsync(id);
-            if (user != null)
-            {
-                _context.Users.Remove(user);
-            }
+            _context.Users.Remove(user);
         }
 
         public async Task<bool> UserExistsAsync(string email)

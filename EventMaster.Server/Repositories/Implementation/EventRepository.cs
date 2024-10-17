@@ -30,13 +30,9 @@ namespace EventMaster.Server.Repositories.Implementation
             return await _context.Events.ToListAsync();
         }
 
-        public async Task DeleteEventAsync(int id)
+        public async Task DeleteEventAsync(Event eventItem)
         {
-            var eventItem = await GetEventByIdAsync(id);
-            if (eventItem != null)
-            {
-                _context.Events.Remove(eventItem);
-            }
+            _context.Events.Remove(eventItem);
         }
 
         public async Task UpdateEventAsync(Event eventItem)
@@ -44,14 +40,10 @@ namespace EventMaster.Server.Repositories.Implementation
             _context.Events.Update(eventItem);
         }
 
-        public async Task UpdateEventImagePathAsync(int eventId, string imagePath)
+        public async Task UpdateEventImagePathAsync(Event eventItem, string imagePath)
         {
-            var eventItem = await GetEventByIdAsync(eventId);
-            if (eventItem != null)
-            {
-                eventItem.ImagePath = imagePath;
-                _context.Events.Update(eventItem);
-            }
+            eventItem.ImagePath = imagePath;
+            _context.Events.Update(eventItem);
         }
 
         public async Task UploadImageFileAsync(Event eventItem, IFormFile imageFile)

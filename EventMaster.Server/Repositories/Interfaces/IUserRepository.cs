@@ -9,7 +9,7 @@ namespace EventMaster.Server.Repositories.Interfaces
         Task<User?> GetUserByEmailAsync(string email);
         Task<List<User>> GetAllUsersAsync();
         Task UpdateUserAsync(User user);
-        Task DeleteUserAsync(int id);
+        Task DeleteUserAsync(User user);
         Task<bool> UserExistsAsync(string email);
     }
 }

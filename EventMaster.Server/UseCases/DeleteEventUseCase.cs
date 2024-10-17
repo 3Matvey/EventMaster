@@ -19,7 +19,8 @@ namespace EventMaster.Server.UseCases
                 throw new KeyNotFoundException("Event not found");
             }
 
-            await _unitOfWork.EventRepository.DeleteEventAsync(eventId);
+            //await _unitOfWork.EventRepository.DeleteEventAsync(eventId);
+            await _unitOfWork.EventRepository.DeleteEventAsync(eventItem);
             await _unitOfWork.SaveAsync();
 
             return true;

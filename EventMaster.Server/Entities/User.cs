@@ -4,7 +4,7 @@ namespace EventMaster.Server.Entities
 {
     public class User
     {
-        public int Id { get; set; }    
+        public int Id { get; set; } // = default;   
         public string FirstName { get; set; }
         public string LastName { get; set; }
         public DateTime BirthDate { get; set; }

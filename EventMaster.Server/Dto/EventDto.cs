@@ -1,4 +1,6 @@
-﻿namespace EventMaster.Server.Dto
+﻿using EventMaster.Server.Entities;
+
+namespace EventMaster.Server.Dto
 {
     public class EventDto
     {
