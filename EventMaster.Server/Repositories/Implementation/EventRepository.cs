@@ -32,8 +32,16 @@ namespace EventMaster.Server.Repositories.Implementation
 
         public async Task DeleteEventAsync(Event eventItem)
         {
+            if (eventItem.ImagePath != null && eventItem.ImagePath.StartsWith("/images/"))
+            {
+                string path = Path.Combine(Directory.GetCurrentDirectory(), "wwwroot", eventItem.ImagePath.TrimStart('/'));
+                if (File.Exists(path))
+                    File.Delete(path);
+            }
+
             _context.Events.Remove(eventItem);
         }
+
 
         public async Task UpdateEventAsync(Event eventItem)
         {

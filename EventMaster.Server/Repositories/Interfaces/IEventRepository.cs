@@ -13,5 +13,4 @@ namespace EventMaster.Server.Repositories.Interfaces
         Task UploadImageFileAsync(Event eventItem, IFormFile imageFile);
         Task UploadImageFromUrlAsync(Event eventItem, string imageUrl);
     }
-
 }
