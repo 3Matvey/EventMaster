@@ -1,0 +1,77 @@
+/* Welcome.css */
+body {
+    margin: 0;
+    padding: 0;
+    font-family: Arial, sans-serif;
+    background: linear-gradient(135deg, #0f0c29, #302b63, #24243e);
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    color: #ffffff;
+}
+
+.welcome-container {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100vh;
+}
+
+.welcome-card {
+    background: #1a1a2e; /* Темный фон для карточки */
+    padding: 50px;
+    border-radius: 15px;
+    box-shadow: 0px 20px 40px rgba(0, 0, 0, 0.7);
+    text-align: center;
+    max-width: 500px;
+}
+
+.welcome-title {
+    font-size: 2.5rem;
+    margin-bottom: 20px;
+    color: #e0e0e0;
+}
+
+.welcome-description {
+    font-size: 1.2rem;
+    margin-bottom: 40px;
+    color: #b0b0b0;
+}
+
+.welcome-buttons {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+}
+
+.btn {
+    padding: 15px 30px;
+    font-size: 1rem;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s, transform 0.3s;
+    text-transform: uppercase;
+    font-weight: bold;
+}
+
+.login-btn {
+    background: linear-gradient(45deg, #ff416c, #ff4b2b);
+    color: #ffffff;
+}
+
+.register-btn {
+    background: linear-gradient(45deg, #4facfe, #00f2fe);
+    color: #ffffff;
+}
+
+.btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0px 10px 20px rgba(255, 255, 255, 0.3);
+}
+
+.btn:active {
+    transform: translateY(1px);
+    box-shadow: none;
+}

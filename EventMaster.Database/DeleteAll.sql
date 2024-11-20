@@ -1,0 +1,3 @@
+﻿DELETE FROM Users;
+
+DELETE FROM Events;

@@ -1,0 +1,114 @@
+/* UserEvents.css */
+
+/* Основной контейнер для зарегистрированных событий */
+.user-events-container {
+    max-width: 800px;
+    margin: 40px auto;
+    padding: 20px;
+    border-radius: 10px;
+    background-color: #2c2f33;
+    box-shadow: 0px 8px 16px rgba(0, 0, 0, 0.3);
+    color: #ffffff;
+    font-family: 'Arial', sans-serif;
+}
+
+    /* Заголовок списка событий */
+    .user-events-container h2 {
+        font-size: 2rem;
+        text-align: center;
+        color: #ffffff;
+        margin-bottom: 20px;
+    }
+
+/* Список событий */
+.user-events-list {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+    /* Элемент списка событий */
+    .user-events-list li {
+        background-color: #23272a;
+        padding: 15px;
+        margin-bottom: 15px;
+        border-radius: 8px;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        color: #ffffff;
+    }
+
+/* Текст события */
+.event-details {
+    flex-grow: 1;
+    font-size: 1rem;
+    margin-right: 10px;
+}
+
+/* Кнопки */
+.event-actions {
+    display: flex;
+    gap: 10px;
+}
+
+    .event-actions button {
+        padding: 10px 15px;
+        border: none;
+        border-radius: 5px;
+        font-size: 1rem;
+        cursor: pointer;
+        transition: background-color 0.3s, transform 0.3s;
+    }
+
+.view-details-btn {
+    background-color: #4facfe;
+    color: #ffffff;
+}
+
+.unregister-btn {
+    background-color: #ff5c5c;
+    color: #ffffff;
+}
+
+.event-actions button:hover {
+    transform: translateY(-2px);
+}
+
+.event-actions button:active {
+    transform: translateY(1px);
+}
+
+.event-actions button.view-details-btn:hover {
+    background-color: #3e8ccf;
+}
+
+.event-actions button.unregister-btn:hover {
+    background-color: #e04646;
+}
+
+/* Сообщение, если нет зарегистрированных событий */
+.no-events-message {
+    text-align: center;
+    font-size: 1.2rem;
+    color: #b0b3b8;
+    margin-top: 30px;
+}
+.message {
+    padding: 10px;
+    margin-bottom: 15px;
+    border-radius: 5px;
+    font-size: 1rem;
+}
+
+    .message.success {
+        background-color: #d4edda;
+        color: #155724;
+        border: 1px solid #c3e6cb;
+    }
+
+    .message.error {
+        background-color: #f8d7da;
+        color: #721c24;
+        border: 1px solid #f5c6cb;
+    }
