@@ -1,4 +1,4 @@
-Для полноценной проверки работоспособности системы нужно добавить пользователей и события, например выполнив
+Для полноценной проверки работоспособности системы нужно добавить пользователей и события, например выполнив (EventMaster.Database/StarterKit.sql):
 ```
 INSERT INTO Users (FirstName, LastName, BirthDate, DateOf, Email, Role, Password)
 VALUES
@@ -14,3 +14,6 @@ VALUES
 ('Networking Event', 'A special networking event for professionals', '2024-10-15', 'City Hall', 'Networking', 200, NULL),
 ('Coding Workshop', 'A hands-on coding workshop for beginners', '2024-10-20', 'Tech Park', 'Coding Workshop', 30, NULL);
 ```
+И войти в систему как администратор:
+login: jane.smith@example.com
+password: 456
