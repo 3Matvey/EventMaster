@@ -1,12 +1,11 @@
 services:
-  # 1. Контейнер с ASP.NET Core (EventMaster.Web)
+  # 1. Контейнер с бэкендом (EventMaster.Web)
   web:
     build:
       context: .
       dockerfile: ./EventMaster.Web/Dockerfile
-    image: emteshka/eventmaster-web:latest
     ports:
-      - "5000:80"        # Пробрасываем порт 80 контейнера на 5000 хоста
+      - "5000:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__EventMasterDb=Server=db;Database=EventMasterDb;User=sa;Password=YourStrong!Passw0rd
@@ -18,18 +17,22 @@ services:
     build:
       context: ./eventmaster.client
       dockerfile: Dockerfile
-    image: emteshka/eventmaster-client:latest
     ports:
       - "3000:80"
+    environment:
+      # Значение, которое попадёт в config.json через envsubst
+      - SERVER_HOST_ADDRESS=http://web:80
     depends_on:
       - web
 
-  # 3. Контейнер с SQL Server
+  # 3. Контейнер с SQL Server (кастомный образ с инициализацией)
   db:
-    image: mcr.microsoft.com/mssql/server:2022-latest
+    build:
+      context: ./EventMaster.Database
+      dockerfile: Dockerfile
     environment:
-      SA_PASSWORD: "YourStrong!Passw0rd"
-      ACCEPT_EULA: "Y"
+      - SA_PASSWORD=YourStrong!Passw0rd
+      - ACCEPT_EULA=Y
     ports:
       - "1433:1433"
     volumes:

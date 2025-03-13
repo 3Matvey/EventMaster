@@ -61,5 +61,9 @@
     <None Include="GetEntities.sql" />
     <None Include="StarterKit.sql" />
     <None Include="DeleteAll.sql" />
+    <None Include="Dockerfile">
+      <Generator>TextTemplatingFileGenerator</Generator>
+    </None>
+    <None Include="entrypoint.sh" />
   </ItemGroup>
 </Project>
