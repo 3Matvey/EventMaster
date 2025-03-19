@@ -1,5 +1,6 @@
+version: '3.8'
+
 services:
-  # 1. Контейнер с бэкендом (EventMaster.Web)
   web:
     build:
       context: .
@@ -12,31 +13,25 @@ services:
     depends_on:
       - db
 
-  # 2. Контейнер с React (eventmaster.client)
   client:
     build:
       context: ./eventmaster.client
       dockerfile: Dockerfile
     ports:
       - "3000:80"
-    environment:
-      # Значение, которое попадёт в config.json через envsubst
-      - SERVER_HOST_ADDRESS=http://web:80
     depends_on:
       - web
 
-  # 3. Контейнер с SQL Server (кастомный образ с инициализацией)
   db:
-    build:
-      context: ./EventMaster.Database
-      dockerfile: Dockerfile
+    image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
-      - SA_PASSWORD=YourStrong!Passw0rd
-      - ACCEPT_EULA=Y
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
     ports:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./EventMaster.Database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
 volumes:
   mssql_data:

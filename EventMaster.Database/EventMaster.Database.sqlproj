@@ -66,4 +66,7 @@
     </None>
     <None Include="entrypoint.sh" />
   </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="init-db.sql" />
+  </ItemGroup>
 </Project>
