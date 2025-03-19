@@ -8,9 +8,5 @@ ENV ACCEPT_EULA=Y
 # Копируем скрипт инициализации в контейнер
 COPY ./init-db.sql /init-db.sql
 
-# Копируем скрипт запуска
-COPY ./entrypoint.sh /entrypoint.sh
-RUN chmod +x /entrypoint.sh
-
 # Указываем команду для запуска SQL Server и выполнения скрипта
-CMD /bin/bash /entrypoint.sh
+CMD /bin/bash -c "/opt/mssql/bin/sqlservr & /opt/mssql-tools/bin/sqlcmd -S localhost -U sa -P $SA_PASSWORD -d master -i /init-db.sql"
