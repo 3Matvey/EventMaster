@@ -65,4 +65,7 @@
   <ItemGroup>
     <PreDeploy Include="init-db.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <Build Include="Dockerfile" />
+  </ItemGroup>
 </Project>
