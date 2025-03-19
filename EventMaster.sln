@@ -17,7 +17,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "EventMaster.Web", "EventMas
 EndProject
 Project("{00D1A9C2-B5F0-4AF3-8072-F6C62B433612}") = "EventMaster.Database", "EventMaster.Database\EventMaster.Database.sqlproj", "{F4788B06-7310-483C-B09E-EFC327DCE27C}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{403C1FF3-09AD-4CCF-9275-FF01FC5770BE}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Элементы решения", "Элементы решения", "{0108952C-E83D-484A-BA65-6A6C93E87289}"
 	ProjectSection(SolutionItems) = preProject
 		docker-compose.yml = docker-compose.yml
 	EndProjectSection

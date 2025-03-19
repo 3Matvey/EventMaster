@@ -62,4 +62,7 @@
     <None Include="StarterKit.sql" />
     <None Include="DeleteAll.sql" />
   </ItemGroup>
+  <ItemGroup>
+    <PreDeploy Include="init-db.sql" />
+  </ItemGroup>
 </Project>

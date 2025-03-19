@@ -1,30 +1,27 @@
+version: '3.8'
+
 services:
-  # 1. Контейнер с ASP.NET Core (EventMaster.Web)
   web:
     build:
       context: .
       dockerfile: ./EventMaster.Web/Dockerfile
-    image: emteshka/eventmaster-web:latest
     ports:
-      - "5000:80"        # Пробрасываем порт 80 контейнера на 5000 хоста
+      - "5000:80"
     environment:
       - ASPNETCORE_ENVIRONMENT=Development
       - ConnectionStrings__EventMasterDb=Server=db;Database=EventMasterDb;User=sa;Password=YourStrong!Passw0rd
     depends_on:
       - db
 
-  # 2. Контейнер с React (eventmaster.client)
   client:
     build:
       context: ./eventmaster.client
       dockerfile: Dockerfile
-    image: emteshka/eventmaster-client:latest
     ports:
       - "3000:80"
     depends_on:
       - web
 
-  # 3. Контейнер с SQL Server
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
     environment:
@@ -34,6 +31,7 @@ services:
       - "1433:1433"
     volumes:
       - mssql_data:/var/opt/mssql
+      - ./EventMaster.Database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
 
 volumes:
   mssql_data:
