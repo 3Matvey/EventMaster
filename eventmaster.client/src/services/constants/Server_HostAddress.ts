@@ -1,4 +1,5 @@
 //export const Server_HostAddress : string = 'http://localhost:5242';
 
-export const Server_HostAddress: string = 'http://web';
+export const Server_HostAddress: string = 'http://eventmaster-web-1';
+
  
