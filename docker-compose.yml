@@ -1,3 +1,5 @@
+version: '3.8'
+
 services:
   web:
     build:
@@ -10,8 +12,6 @@ services:
       - ConnectionStrings__EventMasterDb=Server=db;Database=EventMasterDb;User=sa;Password=YourStrong!Passw0rd
     depends_on:
       - db
-    networks:
-      - app-network
 
   client:
     build:
@@ -21,8 +21,6 @@ services:
       - "3000:80"
     depends_on:
       - web
-    networks:
-      - app-network
 
   db:
     image: mcr.microsoft.com/mssql/server:2022-latest
@@ -34,12 +32,6 @@ services:
     volumes:
       - mssql_data:/var/opt/mssql
       - ./EventMaster.Database/init-db.sql:/docker-entrypoint-initdb.d/init-db.sql
-    networks:
-      - app-network
 
 volumes:
   mssql_data:
-
-networks:
-  app-network:
-    driver: bridge
