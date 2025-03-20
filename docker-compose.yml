@@ -27,4 +27,4 @@ services:
       SA_PASSWORD: "YourStrong!Passw0rd"
       ACCEPT_EULA: "Y"
     volumes:
-       - ./db_table.sql:/docker-entrypoint-initdb.d/init-script.sql
+        - ./EventMaster.Database/init-db.sql:/docker-entrypoint-initdb.d/init-script.sql
