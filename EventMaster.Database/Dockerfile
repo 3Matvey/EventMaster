@@ -8,7 +8,7 @@ ENV ACCEPT_EULA=Y
 # Переключаемся на root для установки утилит
 USER root
 RUN apt-get update && \
-    apt-get install -y curl apt-transport-https && \
+    apt-get install -y curl apt-transport-https gnupg && \
     curl https://packages.microsoft.com/keys/microsoft.asc | apt-key add - && \
     curl https://packages.microsoft.com/config/ubuntu/20.04/prod.list > /etc/apt/sources.list.d/mssql-tools.list && \
     apt-get update && \
