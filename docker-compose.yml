@@ -1,27 +1,30 @@
-#version: '3.8'
+version: '3.8'
 
 services:
   web:
     build:
-      context: .
-      dockerfile: ./EventMaster.Web/Dockerfile
+      context: ./EventMaster.Web
+      dockerfile: Dockerfile
     ports:
       - "5000:80"
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   client:
     build:
       context: ./eventmaster.client
-      dockerfile: Dockerfile 
+      dockerfile: Dockerfile
     ports:
       - "3000:80"
     depends_on:
       - web
 
   db:
-    build:
-      context: ./EventMaster.Database
-      dockerfile: Dockerfile
     ports:
       - "1433:1433"
+    environment:
+      SA_PASSWORD: "YourStrong!Passw0rd"
+      ACCEPT_EULA: "Y"
+    volumes:
+       - ./db_table.sql:/docker-entrypoint-initdb.d/init-script.sql
