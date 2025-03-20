@@ -1,4 +1,4 @@
-version: '3.8'
+#version: '3.8'
 
 services:
   web:
@@ -13,7 +13,7 @@ services:
   client:
     build:
       context: ./eventmaster.client
-      dockerfile: Dockerfile
+      dockerfile: Dockerfile 
     ports:
       - "3000:80"
     depends_on:
@@ -25,8 +25,3 @@ services:
       dockerfile: Dockerfile
     ports:
       - "1433:1433"
-    volumes:
-      - mssql_data:/var/opt/mssql
-
-volumes:
-  mssql_data:

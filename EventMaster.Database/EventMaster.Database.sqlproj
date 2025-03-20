@@ -61,11 +61,9 @@
     <None Include="GetEntities.sql" />
     <None Include="StarterKit.sql" />
     <None Include="DeleteAll.sql" />
+    <None Include="Dockerfile" />
   </ItemGroup>
   <ItemGroup>
     <PreDeploy Include="init-db.sql" />
-  </ItemGroup>
-  <ItemGroup>
-    <Build Include="Dockerfile" />
   </ItemGroup>
 </Project>
