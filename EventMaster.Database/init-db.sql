@@ -1,46 +1,58 @@
-﻿-- EventMaster.Database/init-db.sql
-
-CREATE DATABASE EventMasterDB;
+﻿-- Create EventMasterDB database if it does not exist
+IF NOT EXISTS (
+    SELECT name 
+    FROM sys.databases 
+    WHERE name = N'EventMasterDB'
+)
+BEGIN
+    CREATE DATABASE [EventMasterDB];
+END;
 GO
 
-USE EventMasterDB;
+-- Switch to the new database
+USE [EventMasterDB];
 GO
 
-CREATE TABLE Users (
-    Id INT PRIMARY KEY IDENTITY,
-    Username NVARCHAR(50) NOT NULL,
-    PasswordHash NVARCHAR(255) NOT NULL,
-    Email NVARCHAR(255) NOT NULL
-);
+-- Create Users table (if not exists)
+IF OBJECT_ID(N'dbo.Users', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Users (
+        UserID   INT           IDENTITY(1,1) PRIMARY KEY,  -- auto-increment ID&#8203;:contentReference[oaicite:14]{index=14}
+        UserName NVARCHAR(100) NOT NULL,
+        Email    NVARCHAR(100) NULL
+    );
+END;
 GO
 
-CREATE TABLE Events (
-    Id INT PRIMARY KEY IDENTITY,
-    Name NVARCHAR(100) NOT NULL,
-    Description NVARCHAR(500),
-    Date DATETIME NOT NULL,
-    Location NVARCHAR(255)
-);
+-- Create Events table (if not exists), with foreign key linking to Users
+IF OBJECT_ID(N'dbo.Events', N'U') IS NULL
+BEGIN
+    CREATE TABLE dbo.Events (
+        EventID     INT           IDENTITY(1,1) PRIMARY KEY,
+        EventName   NVARCHAR(100) NOT NULL,
+        EventDate   DATETIME      NOT NULL,
+        OrganizerID INT           NOT NULL,
+        FOREIGN KEY (OrganizerID) REFERENCES dbo.Users(UserID)
+    );
+END;
 GO
 
--- Добавьте начальные данные, если необходимо
-INSERT INTO Users (Username, PasswordHash, Email) VALUES ('admin', 'hashedpassword', 'admin@example.com');
-INSERT INTO Events (Name, Description, Date, Location) VALUES ('Sample Event', 'This is a sample event.', GETDATE(), 'Sample Location');
+-- Insert initial Users (only if table is empty)
+IF NOT EXISTS (SELECT 1 FROM dbo.Users)
+BEGIN
+    INSERT INTO dbo.Users (UserName, Email)
+    VALUES 
+        (N'Alice', N'alice@example.com'),
+        (N'Bob',   N'bob@example.com');
+END;
 GO
 
--- Содержимое StarterKit.sql
-INSERT INTO Users (FirstName, LastName, BirthDate, DateOf, Email, Role, Password)
-VALUES
-('John', 'Doe', '1990-05-15', GETDATE(), 'john.doe@example.com', 'User', '123'),
-('Jane', 'Smith', '1985-08-23', GETDATE(), 'jane.smith@example.com', 'Admin', '456'),
-('Alex', 'Johnson', '1993-10-02', GETDATE(), 'alex.johnson@example.com', 'User', '789'),
-('Maria', 'Kovalsky', '1992-11-12', GETDATE(), 'maria.kovalsky@example.com', 'User', '321');
-GO
-
-INSERT INTO Events (Name, Description, Date, Place, Type, MaxMemberCount, ImagePath)
-VALUES
-('First Event', 'Description of the first event', '2024-10-07', 'Conference Hall A', 'Conference', 100, NULL),
-('Second Event', 'Description of the second event', '2024-10-10', 'Auditorium B', 'Workshop', 50, NULL),
-('Networking Event', 'A special networking event for professionals', '2024-10-15', 'City Hall', 'Networking', 200, NULL),
-('Coding Workshop', 'A hands-on coding workshop for beginners', '2024-10-20', 'Tech Park', 'Coding Workshop', 30, NULL);
+-- Insert initial Events (only if table is empty)
+IF NOT EXISTS (SELECT 1 FROM dbo.Events)
+BEGIN
+    INSERT INTO dbo.Events (EventName, EventDate, OrganizerID)
+    VALUES
+        (N'Conference 2025', '2025-03-20', 1),
+        (N'Workshop 2025',   '2025-04-15', 2);
+END;
 GO
